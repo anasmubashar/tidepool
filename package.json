@@ -1,0 +1,21 @@
+{
+  "name": "small-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Small Web: The sites, and the browser you read them in.",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"cyan,magenta\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm --prefix backend run start:dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed",
+    "test": "npm --prefix backend run test && npm --prefix frontend run test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
