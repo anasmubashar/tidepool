@@ -43,6 +43,24 @@ export class VisitsService {
       .exec();
   }
 
+  async getAllVisits(
+    limit = 100,
+    search?: string,
+  ): Promise<VisitDocument[]> {
+    const query: any = {};
+
+    if (search && search.trim()) {
+      const regex = new RegExp(search.trim(), 'i');
+      query.$or = [{ address: regex }, { title: regex }];
+    }
+
+    return this.visitModel
+      .find(query)
+      .sort({ visitedAt: -1 })
+      .limit(limit)
+      .exec();
+  }
+
   async clearHistory(personId: string): Promise<void> {
     await this.visitModel.deleteMany({ personId: personId.toLowerCase().trim() }).exec();
   }

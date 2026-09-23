@@ -12,6 +12,19 @@ export class VisitsController {
     return this.visitsService.recordVisit(dto);
   }
 
+  @Get()
+  async getVisits(
+    @Query('personId') personId?: string,
+    @Query('limit') limit?: string,
+    @Query('q') q?: string,
+  ) {
+    const numLimit = limit ? parseInt(limit, 10) : 100;
+    if (personId && personId.trim()) {
+      return this.visitsService.getHistoryByPerson(personId, numLimit, q);
+    }
+    return this.visitsService.getAllVisits(numLimit, q);
+  }
+
   @Get('person/:personId')
   async getHistory(
     @Param('personId') personId: string,
