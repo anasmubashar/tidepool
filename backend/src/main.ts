@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { SitesService } from './sites/sites.service';
+import { SeedService } from './seed/seed.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -22,6 +24,14 @@ async function bootstrap() {
       forbidNonWhitelisted: false,
     }),
   );
+
+  // Auto-seed if database is empty (e.g. freshly initialized in-memory database)
+  const sitesService = app.get(SitesService);
+  const count = await sitesService.count();
+  if (count === 0) {
+    const seedService = app.get(SeedService);
+    await seedService.run();
+  }
 
   const port = process.env.PORT ?? 4000;
   await app.listen(port);
