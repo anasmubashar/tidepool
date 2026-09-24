@@ -107,7 +107,15 @@ export async function searchSites(
     if (!res.ok) {
       return { query, total: 0, results: [] };
     }
-    return await res.json();
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      return { query, total: data.length, results: data };
+    }
+    return {
+      query: data.query || query,
+      total: data.total ?? (data.results ? data.results.length : 0),
+      results: data.results || [],
+    };
   } catch (error) {
     console.error('API searchSites error:', error);
     return { query, total: 0, results: [] };

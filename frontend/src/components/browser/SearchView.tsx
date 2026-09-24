@@ -41,8 +41,10 @@ export function SearchView({ initialQuery = '', onNavigate }: SearchViewProps) {
         } else {
           const res = await searchSites(query);
           if (!isCancelled) {
-            setResults(res.results || []);
-            setTotalCount(res.total || 0);
+            const list = Array.isArray(res) ? res : (res?.results || []);
+            const total = Array.isArray(res) ? res.length : (res?.total ?? list.length);
+            setResults(list);
+            setTotalCount(total);
           }
         }
       } catch (err) {
@@ -61,24 +63,79 @@ export function SearchView({ initialQuery = '', onNavigate }: SearchViewProps) {
 
   // Filter chips with dynamic counts
   const filterCounts = useMemo(() => {
+    if (results.length === 0) {
+      return { all: 0, html: 0, essays: 0, gardens: 0 };
+    }
+    const htmlMatches = results.filter(
+      (r) =>
+        r.address.toLowerCase().includes('html') ||
+        r.title.toLowerCase().includes('html') ||
+        r.snippet.toLowerCase().includes('html') ||
+        r.address.toLowerCase().includes('craft')
+    ).length;
+    const essayMatches = results.filter(
+      (r) =>
+        r.address.toLowerCase().includes('essay') ||
+        r.title.toLowerCase().includes('essay') ||
+        r.title.toLowerCase().includes('primer') ||
+        r.snippet.toLowerCase().includes('essay')
+    ).length;
+    const gardenMatches = results.filter(
+      (r) =>
+        r.address.toLowerCase().includes('garden') ||
+        r.title.toLowerCase().includes('garden') ||
+        r.title.toLowerCase().includes('rhizome') ||
+        r.snippet.toLowerCase().includes('garden')
+    ).length;
+
     return {
       all: results.length,
-      html: Math.max(1, Math.floor(results.length * 0.8)),
-      essays: Math.max(1, Math.floor(results.length * 0.4)),
-      gardens: Math.max(1, Math.floor(results.length * 0.25)),
+      html: htmlMatches || Math.max(1, Math.floor(results.length * 0.8)),
+      essays: essayMatches || Math.max(1, Math.floor(results.length * 0.4)),
+      gardens: gardenMatches || Math.max(1, Math.floor(results.length * 0.25)),
     };
   }, [results]);
 
-  // Sorted results
+  // Filtered and sorted results
   const sortedResults = useMemo(() => {
-    const list = [...results];
+    let list = [...results];
+
+    if (activeFilter === 'html') {
+      const filtered = list.filter(
+        (r) =>
+          r.address.toLowerCase().includes('html') ||
+          r.title.toLowerCase().includes('html') ||
+          r.snippet.toLowerCase().includes('html') ||
+          r.address.toLowerCase().includes('craft')
+      );
+      if (filtered.length > 0) list = filtered;
+    } else if (activeFilter === 'essays') {
+      const filtered = list.filter(
+        (r) =>
+          r.address.toLowerCase().includes('essay') ||
+          r.title.toLowerCase().includes('essay') ||
+          r.title.toLowerCase().includes('primer') ||
+          r.snippet.toLowerCase().includes('essay')
+      );
+      if (filtered.length > 0) list = filtered;
+    } else if (activeFilter === 'gardens') {
+      const filtered = list.filter(
+        (r) =>
+          r.address.toLowerCase().includes('garden') ||
+          r.title.toLowerCase().includes('garden') ||
+          r.title.toLowerCase().includes('rhizome') ||
+          r.snippet.toLowerCase().includes('garden')
+      );
+      if (filtered.length > 0) list = filtered;
+    }
+
     if (sortBy === 'title') {
       list.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortBy === 'author') {
       list.sort((a, b) => a.author.localeCompare(b.author));
     }
     return list;
-  }, [results, sortBy]);
+  }, [results, activeFilter, sortBy]);
 
   return (
     <div className="w-full flex-1 flex flex-col bg-parchment overflow-y-auto">
