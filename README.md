@@ -64,6 +64,4 @@ tidepool/
 | `GET` | `/visits/person/:personId` | Get person's browsing history |
 | `GET` | `/search?q=...` | Full-text search with snippets |
 
-## Design
 
-UI follows the Tidepool Figma design — warm parchment palette (`#fbf9f5`), terracotta accent (`#b8502a`), Liberation Serif typography, hairline editorial grid.

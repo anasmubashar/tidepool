@@ -1,6 +1,9 @@
 import { Module, Global, Logger } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as net from 'net';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const logger = new Logger('DatabaseModule');
 
@@ -29,9 +32,10 @@ function isPortOpen(host: string, port: number, timeout = 1000): Promise<boolean
 let memoryServerInstance: any = null;
 
 export async function getMongoUri(): Promise<string> {
-  if (process.env.MONGODB_URI) {
-    logger.log(`Connecting to MONGODB_URI: ${process.env.MONGODB_URI}`);
-    return process.env.MONGODB_URI;
+  const envUri = process.env.MONGODB_URI || process.env.MONGOURL;
+  if (envUri) {
+    logger.log(`Connecting to external MongoDB: ${envUri}`);
+    return envUri;
   }
 
   // Check if standard MongoDB is listening on localhost:27017
